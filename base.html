@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CampusFix - Smart Campus Issue Tracker{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome for crisp icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Logo -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md group-hover:bg-indigo-700 transition">
+                        <i class="fa-solid fa-screwdriver-wrench text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-bold tracking-tight text-slate-900">Campus<span class="text-indigo-600">Fix</span></span>
+                            <span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-semibold">Hackathon MVP</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium hidden sm:block">Smart Campus Issue Tracker</p>
+                    </div>
+                </a>
+
+                <!-- Navigation Links & Actions -->
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <nav class="flex items-center bg-slate-100 p-1 rounded-xl text-sm font-medium text-slate-600">
+                        <a href="/" class="px-3.5 py-1.5 rounded-lg transition {% if request.path == '/' %}bg-white text-indigo-700 shadow-xs font-semibold{% else %}hover:text-slate-900{% endif %}">
+                            <i class="fa-solid fa-list-check mr-1.5"></i>Campus Board
+                        </a>
+                        <a href="/department" class="px-3.5 py-1.5 rounded-lg transition {% if request.path == '/department' %}bg-white text-indigo-700 shadow-xs font-semibold{% else %}hover:text-slate-900{% endif %}">
+                            <i class="fa-solid fa-building-user mr-1.5"></i>Department Portal
+                        </a>
+                    </nav>
+
+                    <button onclick="openReportModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-4 py-2 rounded-xl shadow-sm transition flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-circle-plus"></i>
+                        <span class="hidden sm:inline">Report Issue</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-12">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p>🏫 <strong>CampusFix</strong> &bull; Built for Student & Campus Community Problem Resolution</p>
+            <p class="flex items-center gap-2">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>System Online (Local SQLite &bull; Python Flask)</span>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Global Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Scripts -->
+    <script src="/static/js/app.js?v=1.4"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

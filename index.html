@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Top Hero Section & Statistics -->
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Campus Issue Board</h1>
+                <p class="text-slate-500 text-sm mt-1">Real-time status updates from campus facilities, IT, electrical & maintenance teams.</p>
+            </div>
+            <div>
+                <button onclick="openReportModal()" class="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm transition">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>Submit New Issue</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="stats-container">
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-bullhorn"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Reports</p>
+                    <h3 class="text-2xl font-bold text-slate-900" id="stat-total">-</h3>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">In Progress</p>
+                    <h3 class="text-2xl font-bold text-slate-900" id="stat-active">-</h3>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Resolved</p>
+                    <h3 class="text-2xl font-bold text-slate-900" id="stat-resolved">-</h3>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Urgent Action</p>
+                    <h3 class="text-2xl font-bold text-rose-600" id="stat-urgent">-</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Search Bar -->
+    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs mb-8 flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+        <!-- Search Input -->
+        <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" id="search-input" placeholder="Search room, location, ticket #, or keyword..." 
+                   class="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+        </div>
+
+        <!-- Filter Selectors -->
+        <div class="flex flex-wrap sm:flex-nowrap gap-2 items-center">
+            <!-- Department Dropdown -->
+            <select id="department-filter" class="text-sm bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="All">All Departments</option>
+                {% for dept in departments %}
+                <option value="{{ dept }}">{{ dept }}</option>
+                {% endfor %}
+            </select>
+
+            <!-- Status Dropdown -->
+            <select id="status-filter" class="text-sm bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="All">All Statuses</option>
+                <option value="Submitted">Submitted</option>
+                <option value="Assigned">Assigned</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+            </select>
+
+            <button onclick="resetFilters()" title="Reset Filters" class="text-slate-500 hover:text-slate-800 p-2 text-sm rounded-xl hover:bg-slate-100 transition">
+                <i class="fa-solid fa-rotate-left"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Issue Cards Feed -->
+    <div>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <span>Reported Issues</span>
+                <span id="issue-count" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-semibold">Loading...</span>
+            </h2>
+            <span class="text-xs text-slate-500">Sorted by Priority & Recency</span>
+        </div>
+
+        <div id="issues-list" class="space-y-4">
+            <!-- Rendered by JavaScript dynamically -->
+            <div class="p-12 text-center text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-500 mb-2"></i>
+                <p>Loading campus issues...</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal: Report New Issue -->
+<div id="report-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 sm:p-7 relative border border-slate-100">
+        <button onclick="closeReportModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+            <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                <i class="fa-solid fa-pen-to-square text-lg"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-slate-900">Report a Campus Issue</h3>
+                <p class="text-xs text-slate-500">Provide details so the right department can investigate promptly.</p>
+            </div>
+        </div>
+
+        <form id="report-form" onsubmit="submitIssue(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Issue Title *</label>
+                <input type="text" id="form-title" required placeholder="e.g., Water leakage from ceiling in CS Lab 3"
+                       class="w-full text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">Detailed Description *</label>
+                    <button type="button" onclick="triggerAiClassification()" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Auto-Detect with AI</span>
+                    </button>
+                </div>
+                <textarea id="form-description" rows="3" required placeholder="Describe what went wrong, safety hazards, location/room, equipment involved..."
+                          class="w-full text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+            </div>
+
+            <!-- AI Classification Loading Spinner -->
+            <div id="ai-loading" class="hidden items-center gap-2 text-xs font-semibold text-indigo-600 py-1 bg-indigo-50/60 px-3 rounded-xl border border-indigo-100">
+                <i class="fa-solid fa-spinner fa-spin text-sm"></i>
+                <span>AI analyzing issue context, department, priority & location...</span>
+            </div>
+
+            <!-- AI Smart Suggestions Panel -->
+            <div id="ai-suggestion-box" class="hidden bg-gradient-to-r from-indigo-50/90 via-purple-50/60 to-pink-50/30 border border-indigo-200 rounded-2xl p-4 transition-all duration-300">
+                <div class="flex items-center justify-between mb-2.5">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs shadow-xs">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </span>
+                        <span class="text-xs font-bold text-indigo-950 uppercase tracking-wider">AI Suggestions</span>
+                        <span id="ai-confidence-badge" class="bg-indigo-100 text-indigo-700 text-[11px] font-bold px-2 py-0.5 rounded-full border border-indigo-200">95% Match</span>
+                    </div>
+                    <button type="button" onclick="applyAllAiSuggestions()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span>Apply Suggestions</span>
+                    </button>
+                </div>
+
+                <!-- Suggestions Preview Chips -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs mb-2.5">
+                    <div class="bg-white/90 backdrop-blur-xs p-2.5 rounded-xl border border-indigo-100 cursor-pointer hover:border-indigo-300 transition" onclick="applyAiField('department')">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Department</span>
+                        <span id="ai-suggested-dept" class="font-bold text-indigo-700 flex items-center gap-1">-</span>
+                        <span class="text-[10px] text-slate-400">Click to apply</span>
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xs p-2.5 rounded-xl border border-indigo-100 cursor-pointer hover:border-indigo-300 transition" onclick="applyAiField('priority')">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Priority</span>
+                        <span id="ai-suggested-priority" class="font-bold text-slate-800 flex items-center gap-1">-</span>
+                        <span class="text-[10px] text-slate-400">Click to apply</span>
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-xs p-2.5 rounded-xl border border-indigo-100 cursor-pointer hover:border-indigo-300 transition" onclick="applyAiField('location')">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Detected Location</span>
+                        <span id="ai-suggested-location" class="font-bold text-slate-800 truncate flex items-center gap-1">-</span>
+                        <span class="text-[10px] text-slate-400">Click to apply</span>
+                    </div>
+                </div>
+
+                <!-- Explanation / Reasoning -->
+                <p class="text-[11px] text-slate-600 flex items-start gap-1.5 leading-relaxed" id="ai-reasoning-text">
+                    <i class="fa-solid fa-circle-info text-indigo-500 mt-0.5 shrink-0"></i>
+                    <span id="ai-reasoning-content">AI detected keywords matching this department.</span>
+                </p>
+                <div id="ai-applied-feedback" class="hidden text-[11px] font-semibold text-emerald-600 mt-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Suggestions applied! You can confirm or edit the fields below before submitting.</span>
+                </div>
+            </div>
+
+            <!-- Department & Priority fields -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Department *</label>
+                    <select id="form-department" required class="w-full text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="" disabled selected>Select Department</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept }}">{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Priority</label>
+                    <select id="form-priority" class="w-full text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="High">High - Safety hazard, exposed wire, leak, urgent failure</option>
+                        <option value="Medium" selected>Medium - Normal equipment (projector, fan, light, Wi-Fi)</option>
+                        <option value="Low">Low - Cleaning, cosmetic, minor non-urgent</option>
+                        <option value="Urgent">Urgent - Critical emergency</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Specific Location / Room *</label>
+                <input type="text" id="form-location" required placeholder="e.g., Central Library, 2nd Floor Study Room 204"
+                       class="w-full text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Your Name *</label>
+                    <input type="text" id="form-name" required placeholder="e.g., John Doe"
+                           class="w-full text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Your Role *</label>
+                    <select id="form-role" class="w-full text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="Student" selected>Student</option>
+                        <option value="Lecturer">Lecturer / Faculty</option>
+                        <option value="Staff">Campus Staff</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pt-2 flex items-center justify-end gap-3">
+                <button type="button" onclick="closeReportModal()" class="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition">Cancel</button>
+                <button type="submit" id="submit-btn" class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Submit Report</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Issue Timeline & Tracking Details -->
+<div id="details-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 sm:p-7 relative border border-slate-100 max-h-[90vh] flex flex-col">
+        <button onclick="closeDetailsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+            <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <div id="details-modal-content" class="overflow-y-auto pr-1">
+            <!-- Populated via JavaScript -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize page
+    document.addEventListener("DOMContentLoaded", () => {
+        loadStats();
+        loadIssues();
+        if (typeof initAiEventListeners === "function") {
+            initAiEventListeners();
+        }
+
+        // Listen for filter changes
+        document.getElementById("search-input").addEventListener("input", debounce(loadIssues, 300));
+        document.getElementById("department-filter").addEventListener("change", loadIssues);
+        document.getElementById("status-filter").addEventListener("change", loadIssues);
+    });
+</script>
+{% endblock %}

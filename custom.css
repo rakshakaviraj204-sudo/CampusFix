@@ -1,0 +1,85 @@
+/* CampusFix Custom CSS */
+
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Timeline Custom Styles */
+.timeline-line {
+    position: absolute;
+    top: 24px;
+    bottom: 0;
+    left: 15px;
+    width: 2px;
+    background-color: #e2e8f0;
+}
+
+.timeline-step:last-child .timeline-line {
+    display: none;
+}
+
+/* Status Pill Colors */
+.badge-submitted {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.badge-assigned {
+    background-color: #faf5ff;
+    color: #7e22ce;
+    border: 1px solid #e9d5ff;
+}
+
+.badge-in-progress {
+    background-color: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.badge-resolved {
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+/* Priority Badges */
+.priority-urgent {
+    background-color: #ffe4e6;
+    color: #e11d48;
+    border: 1px solid #fecdd3;
+}
+
+.priority-high {
+    background-color: #ffedd5;
+    color: #ea580c;
+    border: 1px solid #fed7aa;
+}
+
+.priority-medium {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.priority-low {
+    background-color: #f8fafc;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
+/* Animations */
+@keyframes pulseSubtle {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.85;
+        transform: scale(1.02);
+    }
+}
+
+.pulse-active {
+    animation: pulseSubtle 2.5s infinite ease-in-out;
+}
